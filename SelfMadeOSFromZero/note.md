@@ -117,6 +117,37 @@ EFI_STATUS EfiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable){
         - UEFIのメモリマップは、1ページ4KBとなっている。
 
 ### 2.5 メモリマップの取得
+- UEFIの機能を使用して、メモリマップを取得する。
+- UEFIには二つの機能が存在する。
+    - ブートサービス
+        - OSを起動するために必要な機能を提供するブートサービス
+    - ランタイムサービス
+        - OS起動前・OS起動後どちらでも使える機能を提供するランタイムサービス
+```c
+EFI_STATUS GetMemoryMap(struct MemoryMap* map){
+    //マップのバッファがNULLだった場合エラー
+    if (map->buffer == NULL){
+        return EFI_BUFFER_TOO_SMALL;
+    }
+
+    map->map_size = map->buffer_size;
+    //EFI_STATUS GetMemoryMap(
+    //  IN OUT UINTN *MemoryMapSize,                書き込みメモリマップの大きさ
+    //  IN OUT EFI_MEMORY_DESCRIPTOR *MemoryMap,    書き込みのメモリ領域の先頭ポインタ
+    //  OUT UINTN *MapKey,                          メモリマップを識別する端の値を書き込む変数
+    //  OUT UINTN *DescriptorSize                   ディスクリプタのサイズ
+    //)
+    // IN OUTはEDK II独自のマクロで関数の引数または戻り値どちらに使用されるかを示す。
+    return gBS->GetMemoryMap(
+        &map->map_size,
+        (EFI_MEMORY_DESCRIPTOR*)map->buffer,
+        &map->map_key,
+        &map->descriptor_size,
+        &map->descriptor_version);
+    )
+}
+```
+
 ### 2.6 メモリマップのファイルへの保存
 ### 2.7 メモリマップの確認
 ### 2.8 ポインタ入門(1): アドレスとポインタ
