@@ -155,3 +155,136 @@ EFI_STATUS GetMemoryMap(struct MemoryMap* map){
 
 
 ## 第3章 画面表示の練習とブートローダ
+
+
+### 3.1 QEMUモニタ
+- ブートローダ作りを始める前にQEMUモニタを使用してデバッグする方法を記述する。
+- レジスタの確認
+    - ```(qemu)info registers```
+- メモリメモリの中で指定したアドレス付近の値を表示する。
+    - addrを先頭するメモリ領域の値を表示する。
+    - /fmtのフォーマット
+        - 個数 + n進数 + サイズ
+            - 進数
+                - x 16進数
+                - d 10進数
+                - i 機械語命令を逆アセンブリにする。
+            - サイズ
+                - b 1バイト
+                - h 2バイト
+                - w 4バイト
+                - g 8バイト
+    - ```x /4xb addr```
+
+### 3.2 レジスタ
+- CPUレジスタは高速にアクセスできる記憶領域である。
+- 種類としては、汎用レジスタと特殊レジスタの二種類が存在する。
+    - 汎用レジスタ
+        - 一般の演算に使用する事が出来るレジスタ
+        - 主な目的は値を記録する事にある。
+        - RAX, RBX, RCX, RDX, RBP, RSI, RDI, RSP, R8～R15が該当する。
+    - 特殊レジスタ
+        - 実行に不可欠な機能を提供するレジスタ
+        - RIP: CPUが次に実行する命令のメモリアドレスを保持するレジスタ
+        - RSP: スタックの最先頭のポインタ
+        - RBP: スタックの最後方のポインタ
+        - RFLAGS: 命令の実行結果によって変化するフラグを集めたレジスタ
+        - CR0: CPUの重要な設定を集めたレジスタ
+
+### 3.3 はじめてのカーネル
+- 本著では、ブートローダとカーネルは別個に実装する事でカーネルはブートローダの制約なく実装が可能になる。
+- 以下がはじめてのカーネルである。
+```c++
+// extern "C"はC言語形式で関数を定義する事を意味している。
+// extern "C"が必要な理由として、C++には名前修飾(マングリング)が存在するが、名前修飾を防ぐために使用する。
+extern "C" void KernelMain(){
+    // __asm__はアセンブリ命令を実行するイディオム
+    // hlt命令はCPUを休止させる
+    while (1) __asm__("hlt");
+}
+```
+- 以下に基づいて、カーネルをコンパイルする。
+```shell
+$ cd $HOME/workspace/mikanos/kernel
+$ git checkout osbook_day03a
+$ clang++ -02 -Wall -g --target=x86_64-elf -ffreestanding -mno-red-zone -fno-exceptions -fno-rtti -std=c++17 -c main.cpp
+$ ld.lld --entry KernelMain -z norelro --image-base 0x100000 --static -o kernel.elf main.o
+```
+- コンパイラのオプション
+    - clang++
+        - -02は、レベル2の最適化を行う事を表している。
+        - -Wallは、警告を沢山出す。
+        - -gは、デバッグ情報月でコンパイルする。
+        - --target=84_64-elfは、x86_4向けの機械語を生成する。
+        - -ffreestandingは、フリースタンディング環境向けのビルドを行う。
+            - フリースタンディング環境向けとは、OSがない環境向けという事である。
+        - -mno-red-zone
+            - red-zone機能を無効にする。
+        - -fno-exceptions
+            - C++の例外機能を使わない。
+        - -fno-rtti
+            - C++の動的型情報を使わない。
+        - -std=c++17
+            - C++のバージョンをC++17とする。
+        - -c
+            - コンパイルのみ
+    - lld
+        - --entry KernekMain
+            - KernelMain()をエントリポイントとする。
+        - -z 
+            - リロケーション樹夫報を読み込み専用にする機能を使わない。
+        - --image-base
+            - 出力されたバイナリのベースアドレスを0x100000番地とする。
+        - -o kernel.elf
+            - 主力ファイル名をkernel.elfとする。
+        - --static
+            - 静的リンクを行う。
+- カーネルを読み出すブートローダは以下の通りである。
+```c
+EFI_FILE_PROTOCOL* kernel_file;
+
+// カーネルファイルを開く処理
+root_dir->Open(
+    root_dir, 
+    &kernel_file,
+    L"\\kernek.elf",    // ファイルの場所を指定する。
+    EFI_FILE_MODE_READ, // Readモードで開く
+    0
+);
+
+UINTN file_info_size = sizeof(EFI_FILE_INFO) + sizeof(CHAR16) * 12
+UINT8 file_info_buffer[file_info_size];
+
+// ファイル情報の取得
+kernel_file->GetInfo(
+    kernel_file,
+    &gEfiFileInfoGuid,
+    &file_info_size,
+    file_info_buffer;
+)
+
+// typedef struct {
+//  UINT64 Size, FileSize, PhysicalSize;
+//  EFI_TIME CreateTime. LastAccessTIme, ModificationTime;
+//  UINT64 Attribute;
+//  CHAR16 FileName[];
+//} 
+EFI_FILE_INFO* file_info = (EFI_FILE_INFO*)file_info_buffer;
+UINTN kernel_file_size = file_info->FileSize;
+
+EFI_PHYSICAL_ADDRES kernel_base_addr = 0x100000;
+
+// メモリの割り当て
+gBS->AllocatePages(
+    AllocateAddress,    //メモリの確保の仕方
+    EfiLoaderData,      //確保するメモリ領域の種別  
+    (kernel_file_size + 0xfff) / 0x1000,    // 大きさ
+    &kernek_base_addr   // 確保したメモリ領域のアドレスcd
+);
+kernel_file->Read(kernel_file, &kernel_file_size, (VOID*)kernel_base_addr);
+Print(L"Kernel: 0x%0lx (%lu bytes)\n", kernel_base_addr, kernek_file_size);
+```
+### 3.4 ブートローダからピクセルを描く
+### 3.5 カーネルからピクセルを描く
+### 3.6 エラー処理をしよう
+### 3.7 ポインタ入門(2): ポインタとアセンブリ言語
