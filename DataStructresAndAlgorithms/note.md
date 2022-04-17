@@ -59,10 +59,66 @@ int main(){
 ```
 
 ### Lecture9. Vector of Vector - Demo
+- for文の定義の仕方として```for (型 変数名: 配列)```の方法もある。
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
 
+int main(){
+    vector<vector<int>> arr = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 9, 10},
+        {11, 12}
+    }
+
+    for (vector<int> vec : arr){
+        for (int num; vec){
+            cout << num << ",";
+        }
+        cout << endl;
+    }
+}
+```
+ 
 ### Lecture10. How to submit Coding exercises?
 
 ### Lecture11. Coding Exercise1. FizzBuzz Test
+```cpp
+#include<vector>
+#include <iostream>
+#include<string>
+using namespace std;
+
+//Complete this method, don't write main
+vector<string> fizzbuzz(int n){
+    vector<string> arr;
+    
+    for (int i = 0; i <= n; i++){
+        if (i % 3 == 0 && i % 5 == 0){
+            arr.push_back("FizzBuzz");    
+        }else if(i % 5 == 0){
+            arr.push_back("Buzz");
+        }else if(i % 3 == 0){
+            arr.push_back("Fizz");
+        }else{
+            arr.push_back(std::to_string(i));
+        }
+    }
+    return arr;
+}
+
+int main(){
+    vector<string> arr = fizzbuzz(15);
+
+    for (string s : arr){
+        cout << s << endl;
+    }
+
+    return 0;
+}
+```
 
 ### Lecture12. Helpful Webinars
 
