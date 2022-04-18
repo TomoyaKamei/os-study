@@ -119,13 +119,92 @@ void main(){
 ## Section5. C言語入門3 条件の分岐
 
 ### Lecture14. if文
+```c
+#include <stdio.h>
+
+void main(){
+    int a;
+    printf("数値を入力: ");
+    scanf("%d", &a);
+
+    if (a > 0){
+        printf("入力した値は、正の数です。\n");
+    }
+}
+```
 
 ### Lecture15. if～else文
+```c
+#include <stdio.h>
+
+void main(){
+    int a;
+    printf("数値を入力:");
+    scanf("%d", &a);
+
+    if (a > 0){
+        printf("入力した値は、正の数です。\n");
+    }else{
+        printf("入力した値は、負の数です。\n");
+    }
+}
+```
 
 ### Lecture16. if～else if～else
+```c
+#include <stdio.h>
+
+void main(){
+    int a;
+    printf("数値を入力:");
+    scanf("%d", &a);
+
+    if (a % 2 == 0){
+        printf("入力した値は、偶数です。\n");
+    }else if (a % 2 != 0){
+        printf("入力した値は、奇数です。\n");
+    }
+}
+```
 
 ### Lecture17. 複雑な条件分岐
+```c
+#include <stdio.h>
+
+void main(){
+    int a;
+    printf("数値を入力:");
+    scanf("%d", &a);
+
+    if (a % 2 == 0){
+        printf("入力した値は、偶数です。\n");
+    }else if (a % 2 != 0){
+        printf("入力した値は、奇数です。\n");
+    }
+}
+```
 
 ### Lecture18. Switch文
+```c
+#include <stdio.h>
+
+void main(){
+    int a;
+    printf("数値を入力:");
+    scanf("%d", &a);    
+
+    switch (num){
+        case 1:
+            printf("uno\n");
+            break;
+        case 2:
+            printf("due\n");
+            break;
+        case 3:
+            printf("tre\n");
+            break;
+    }
+}
+```
 
 ### Lecture19. まとめ
