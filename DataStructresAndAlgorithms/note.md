@@ -181,8 +181,80 @@ int main(){
 ### Lecture14. Pairs Code
 
 ### Lecture15. Triplets
+- Triplet
+    - N個の要素を含む配列と目標となる合計の整数Sが与えられる。
+    - 配列から任意の要素を取り出し、合計の整数Sとなる配列を作る。
+    - 回答の配列Aは、昇順に並べられる必要があり、回答がない場合は、空の配列となる。
 
 ### Lecture16. Triplets Code
+```cpp
+#include<iostream>
+#include<vector>
+using namespace std;
+
+vector<int> triplets_MyAns(vector<int>arr, int S){
+    int totalSum;
+    vector<int> result;
+
+    for (int i; i < arr.Size(); i++){
+        totalSum += i
+        s.insert(arr[i]);
+        if (totalSum == S){
+            return arr
+        }else if (totalSum > S){
+            int diff = totalSum - S
+            vector<int> tmp = triplets_MyAns(result, diff).Size() 
+            if (tmp.Size() != 0){
+                result.insert(result.end(), tmp.begin(), tmp.end())
+                return result
+            }else{
+                return {}
+            }
+        }
+    }
+}
+
+vector<int> triplets_Ans(vector<int>arr, int S){
+    vector<vector <int>> result;
+    int n = arr.size();
+    sort(arr.begin(), arr.end());
+
+    for (int i=0; i<=n-3; i++){
+        int j = i + 1;
+        int k = n - 1;
+
+        while(j < k){
+            int currentSum = arr[i] + arr[j] + arr[k];
+            
+            if (currentSum == S){
+                result.push_back({arr[i], arr[j], arr[k]});
+                j++;
+                k--;
+            }else if (currentSum > S){
+                k--;
+            }else{
+                j++;
+            }
+        }
+    }
+
+    return result;
+}
+
+int main(){
+    vector<int> arr{2, 4, 6, 8, 13};
+    int S = 15;
+
+    auto p = triplet_MyAns(arr, S);
+    if(p.Size()==0){
+        cout << "No such pair";
+    }else{
+        cout << "," << p[1] << endl;
+    }
+
+    return 0
+}
+```
 
 ### Lecture17. Mountain
 
