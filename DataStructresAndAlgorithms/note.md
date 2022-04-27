@@ -257,8 +257,86 @@ int main(){
 ```
 
 ### Lecture17. Mountain
+- Mountain
+    - Mountainは、異なる整数の列を入力として、山となっている配列の長さを出力とする。
 
 ### Lecture18. Mountain Code
+```cpp
+#include<iostream>
+#include<vector>
+using namespace std;
+
+int triplets_MyAns(vector<int>arr){
+    int result = 0;
+    int mountainLenTmp = 0;
+    bool ascFlag = True;
+
+    for (int i = 0; i < arr.Size()-2; i++){
+        int j = arr[i] - arr[i+1]
+
+        if (ascFlag == True){
+            if (j < 0){
+                moutainLenTmp += 1;
+            }else if(j >= 0){
+                ascFlag = False;
+            }
+        }else if (ascFlag == False){
+            if (j > 0){
+                moutainLenTmp += 1;
+            }else{
+                if (result < moutainLenTmp){
+                    result = moutainLenTmp;
+                }
+                moutainLenTmp = 0;
+                ascFlag = True;
+            }
+        }
+    }
+
+    return result;
+}
+
+vector<int> triplets_Ans(vector<int>arr, int S){
+    vector<vector <int>> result;
+    int n = arr.size();
+    sort(arr.begin(), arr.end());
+
+    for (int i=0; i<=n-3; i++){
+        int j = i + 1;
+        int k = n - 1;
+
+        while(j < k){
+            int currentSum = arr[i] + arr[j] + arr[k];
+            
+            if (currentSum == S){
+                result.push_back({arr[i], arr[j], arr[k]});
+                j++;
+                k--;
+            }else if (currentSum > S){
+                k--;
+            }else{
+                j++;
+            }
+        }
+    }
+
+    return result;
+}
+
+int main(){
+    vector<int> arr{2, 4, 6, 8, 13};
+    int S = 15;
+
+    auto p = triplet_MyAns(arr, S);
+    if(p.Size()==0){
+        cout << "No such pair";
+    }else{
+        cout << "," << p[1] << endl;
+    }
+
+    return 0
+}
+```
 
 ### Lecrure19. Longest Band
 
